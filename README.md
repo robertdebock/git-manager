@@ -3,7 +3,7 @@ Save these variables in a vault:
 - vault_github_username
 - vault_github_token
 
-Run `ansible-vault init vault.yml`.
+Run `ansible-vault create vault.yml`.
 
 # Preparation
 
