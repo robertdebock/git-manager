@@ -28,6 +28,11 @@
     - name: set the right timezone
       timezone:
         name: Europe/Amsterdam
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
 
     - name: create a new release for level 0.
       github_release:

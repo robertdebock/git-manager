@@ -8,13 +8,18 @@ Run `ansible-vault create vault.yml`.
 # Preparation
 
 ```
+ansible-galaxy install -r requirements.yml
 vagrant up
 ```
 
 # Create releases
 
 Automatically create releases of all repositories.
-
 ```
-ansible-playbook create-release.yml --ask-vault-pass
+./create-release.yml --ask-vault-pass
+```
+
+Create release for selected levels:
+```
+./create-release.yml --ask-vault-pass --tags level0
 ```
