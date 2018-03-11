@@ -13,6 +13,15 @@ ansible_roles:
     - ansible-role-rsyslog
     - ansible-role-scl
     - ansible-role-xinetd
+  level2:
+    - ansible-role-npm
+    - ansible-role-python-pip
+    - ansible-role-tomcat
+  level3:
+    - ansible-role-docker
+    - ansible-role-mssql
+    - ansible-role-revealmd
+  level99:
     - ansible-role-dhcpd
     - ansible-role-dns
     - ansible-role-dovecot
@@ -22,12 +31,8 @@ ansible_roles:
     - ansible-role-release
     - ansible-role-ruby
     - ansible-role-update
-  level2:
     - ansible-role-clamav
-    - ansible-role-npm
-    - ansible-role-python-pip
     - ansible-role-spamassassin
-    - ansible-role-tomcat
     - ansible-role-fail2ban
     - ansible-role-natrouter
     - ansible-role-nginx
@@ -35,7 +40,3 @@ ansible_roles:
     - ansible-role-rundeck
     - ansible-role-tftpd
     - ansible-role-zabbix
-  level3:
-    - ansible-role-docker
-    - ansible-role-mssql
-    - ansible-role-revealmd

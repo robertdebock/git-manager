@@ -9,25 +9,71 @@
     - variables.yml
 
   vars:
-    release_name: "Major-minor"
-    release_body: "Some minor changes, some major changes."
-
-  roles:
-    - role: robertdebock.bootstrap
-    - role: robertdebock.update
-    - role: robertdebock.ntp
-    - role: robertdebock.buildtools
-    - role: robertdebock.epel
-    - role: robertdebock.scl
-    - role: robertdebock.python-pip
-      python_pip_modules:
-        - name: github3.py
-          version: 1.0.0a4
+    release_name: "Facts reloaded"
+    release_body: "So that bootstrap role is not new, still managed to find an issue. Should be solved with this release."
 
   tasks:
+    - name: bootstrap
+      include_role:
+        name: robertdebock.bootstrap
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
     - name: set the right timezone
       timezone:
         name: Europe/Amsterdam
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
+    - name: ntp
+      include_role:
+        name: robertdebock.ntp
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
+    - name: buildtools
+      include_role:
+        name: robertdebock.buildtools
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
+    - name: epel
+      include_role:
+        name: robertdebock.epel
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
+    - name: scl
+      include_role:
+        name: robertdebock.scl
+      tags:
+        - level0
+        - level1
+        - level2
+        - level3
+
+    - name: python-pip
+      include_role:
+        name: robertdebock.python-pip
+      vars:
+        python_pip_modules:
+          - name: github3.py
+            version: 1.0.0a4
       tags:
         - level0
         - level1
@@ -41,7 +87,7 @@
         repo: "{{ item }}"
         action: create_release
         tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
-        name: "{ release_name }}"
+        name: "{{ release_name }}"
         body: "{{ release_body }}"
       with_items:
         - "{{ ansible_roles.level0 }}"
@@ -51,6 +97,8 @@
     - name: wait a moment for the build to start
       pause:
         seconds: 30
+      tags:
+        - level0
 
     - name: "wait for {{ item }} build to finish"
       uri:
@@ -75,7 +123,7 @@
         repo: "{{ item }}"
         action: create_release
         tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
-        name: "{ release_name }}"
+        name: "{{ release_name }}"
         body: "{{ release_body }}"
       with_items:
         - "{{ ansible_roles.level1 }}"
@@ -85,6 +133,8 @@
     - name: wait a moment for the build to start
       pause:
         seconds: 30
+      tags:
+        - level1
 
     - name: "wait for {{ item }} build to finish"
       uri:
@@ -108,7 +158,7 @@
         repo: "{{ item }}"
         action: create_release
         tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
-        name: "{ release_name }}"
+        name: "{{ release_name }}"
         body: "{{ release_body }}"
       with_items:
         - "{{ ansible_roles.level2 }}"
@@ -118,6 +168,8 @@
     - name: wait a moment for the build to start
       pause:
         seconds: 30
+      tags:
+        - level2
 
     - name: "wait for {{ item }} build to finish"
       uri:
@@ -141,16 +193,18 @@
         repo: "{{ item }}"
         action: create_release
         tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
-        name: "{ release_name }}"
+        name: "{{ release_name }}"
         body: "{{ release_body }}"
       with_items:
         - "{{ ansible_roles.level3 }}"
       tags:
-        - level2
+        - level3
 
     - name: wait a moment for the build to start
       pause:
         seconds: 30
+      tags:
+        - level3
 
     - name: "wait for {{ item }} build to finish"
       uri:
@@ -165,4 +219,37 @@
       delay: 30
       failed_when: travis.json.0.result != 0
       tags:
-        - level2
+        - level3
+
+    - name: create a new release for level 99.
+      github_release:
+        user: "{{ vault_github_username }}"
+        token: "{{ vault_github_token }}"
+        repo: "{{ item }}"
+        action: create_release
+        tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
+        name: "{{ release_name }}"
+        body: "{{ release_body }}"
+      with_items:
+        - "{{ ansible_roles.level99 }}"
+      tags:
+        - level99
+
+    - name: wait a moment for the build to start
+      pause:
+        seconds: 30
+
+    - name: "wait for {{ item }} build to finish"
+      uri:
+        url: "https://api.travis-ci.org/repos/robertdebock/{{ item }}/builds"
+        headers:
+          Authorization: "{{ vault_github_token }}"
+      register: travis
+      with_items:
+        - "{{ ansible_roles.level99 }}"
+      until: travis.json.0.state == "finished"
+      retries: 240
+      delay: 30
+      failed_when: travis.json.0.result != 0
+      tags:
+        - level99
