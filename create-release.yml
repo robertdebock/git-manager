@@ -1,0 +1,163 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+
+  vars_files:
+    - vault.yml
+    - variables.yml
+
+  vars:
+    release_name: "Major-minor"
+    release_body: "Some minor changes, some major changes."
+
+  roles:
+    - role: robertdebock.bootstrap
+    - role: robertdebock.update
+    - role: robertdebock.ntp
+    - role: robertdebock.buildtools
+    - role: robertdebock.epel
+    - role: robertdebock.scl
+    - role: robertdebock.python-pip
+      python_pip_modules:
+        - name: github3.py
+          version: 1.0.0a4
+
+  tasks:
+    - name: set the right timezone
+      timezone:
+        name: Europe/Amsterdam
+
+    - name: create a new release for level 0.
+      github_release:
+        user: "{{ vault_github_username }}"
+        token: "{{ vault_github_token }}"
+        repo: "{{ item }}"
+        action: create_release
+        tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
+        name: "{ release_name }}"
+        body: "{{ release_body }}"
+      with_items:
+        - "{{ ansible_roles.level0 }}"
+      tags:
+        - level0
+
+    - name: wait a moment for the build to start
+      pause:
+        seconds: 30
+
+    - name: "wait for {{ item }} build to finish"
+      uri:
+        url: "https://api.travis-ci.org/repos/robertdebock/{{ item }}/builds"
+        headers:
+          Authorization: "{{ vault_github_token }}"
+      register: travis
+      with_items:
+        - "{{ ansible_roles.level0 }}"
+      until:
+        - travis.json.0.state == "finished"
+      retries: 240
+      delay: 30
+      failed_when: travis.json.0.result != 0
+      tags:
+        - level0
+
+    - name: create a new release for level 1.
+      github_release:
+        user: "{{ vault_github_username }}"
+        token: "{{ vault_github_token }}"
+        repo: "{{ item }}"
+        action: create_release
+        tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
+        name: "{ release_name }}"
+        body: "{{ release_body }}"
+      with_items:
+        - "{{ ansible_roles.level1 }}"
+      tags:
+        - level1
+
+    - name: wait a moment for the build to start
+      pause:
+        seconds: 30
+
+    - name: "wait for {{ item }} build to finish"
+      uri:
+        url: "https://api.travis-ci.org/repos/robertdebock/{{ item }}/builds"
+        headers:
+          Authorization: "{{ vault_github_token }}"
+      register: travis
+      with_items:
+        - "{{ ansible_roles.level1 }}"
+      until: travis.json.0.state == "finished"
+      retries: 240
+      delay: 30
+      failed_when: travis.json.0.result != 0
+      tags:
+        - level1
+
+    - name: create a new release for level 2.
+      github_release:
+        user: "{{ vault_github_username }}"
+        token: "{{ vault_github_token }}"
+        repo: "{{ item }}"
+        action: create_release
+        tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
+        name: "{ release_name }}"
+        body: "{{ release_body }}"
+      with_items:
+        - "{{ ansible_roles.level2 }}"
+      tags:
+        - level2
+
+    - name: wait a moment for the build to start
+      pause:
+        seconds: 30
+
+    - name: "wait for {{ item }} build to finish"
+      uri:
+        url: "https://api.travis-ci.org/repos/robertdebock/{{ item }}/builds"
+        headers:
+          Authorization: "{{ vault_github_token }}"
+      register: travis
+      with_items:
+        - "{{ ansible_roles.level2 }}"
+      until: travis.json.0.state == "finished"
+      retries: 240
+      delay: 30
+      failed_when: travis.json.0.result != 0
+      tags:
+        - level2
+
+    - name: create a new release for level 3.
+      github_release:
+        user: "{{ vault_github_username }}"
+        token: "{{ vault_github_token }}"
+        repo: "{{ item }}"
+        action: create_release
+        tag: "{{ ansible_date_time.year }}.{{ ansible_date_time.month }}.{{ ansible_date_time.day }}"
+        name: "{ release_name }}"
+        body: "{{ release_body }}"
+      with_items:
+        - "{{ ansible_roles.level3 }}"
+      tags:
+        - level2
+
+    - name: wait a moment for the build to start
+      pause:
+        seconds: 30
+
+    - name: "wait for {{ item }} build to finish"
+      uri:
+        url: "https://api.travis-ci.org/repos/robertdebock/{{ item }}/builds"
+        headers:
+          Authorization: "{{ vault_github_token }}"
+      register: travis
+      with_items:
+        - "{{ ansible_roles.level3 }}"
+      until: travis.json.0.state == "finished"
+      retries: 240
+      delay: 30
+      failed_when: travis.json.0.result != 0
+      tags:
+        - level2

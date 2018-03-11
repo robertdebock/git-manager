@@ -1,0 +1,6 @@
+build
+packer_cache
+*.retry
+roles/*
+.vagrant
+vault.yml

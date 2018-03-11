@@ -1,0 +1,7 @@
+- robertdebock.bootstrap
+- robertdebock.update
+- robertdebock.ntp
+- robertdebock.buildtools
+- robertdebock.epel
+- robertdebock.scl
+- robertdebock.python-pip
