@@ -9,8 +9,10 @@
     - variables.yml
 
   vars:
-    release_name: "Facts reloaded"
-    release_body: "So that bootstrap role is not new, still managed to find an issue. Should be solved with this release."
+    release_name: "Virusscanning"
+    release_body: "Finally seems to work now. Only took 2 weeks."
+    delay: 60
+    retries: 60
 
   tasks:
     - name: bootstrap
@@ -110,8 +112,8 @@
         - "{{ ansible_roles.level0 }}"
       until:
         - travis.json.0.state == "finished"
-      retries: 240
-      delay: 30
+      retries: "{{ retries }}"
+      delay: "{{ delay }}"
       failed_when: travis.json.0.result != 0
       tags:
         - level0
@@ -145,8 +147,8 @@
       with_items:
         - "{{ ansible_roles.level1 }}"
       until: travis.json.0.state == "finished"
-      retries: 240
-      delay: 30
+      retries: "{{ retries }}"
+      delay: "{{ delay }}"
       failed_when: travis.json.0.result != 0
       tags:
         - level1
@@ -180,8 +182,8 @@
       with_items:
         - "{{ ansible_roles.level2 }}"
       until: travis.json.0.state == "finished"
-      retries: 240
-      delay: 30
+      retries: "{{ retries }}"
+      delay: "{{ delay }}"
       failed_when: travis.json.0.result != 0
       tags:
         - level2
@@ -215,8 +217,8 @@
       with_items:
         - "{{ ansible_roles.level3 }}"
       until: travis.json.0.state == "finished"
-      retries: 240
-      delay: 30
+      retries: "{{ retries }}"
+      delay: "{{ delay }}"
       failed_when: travis.json.0.result != 0
       tags:
         - level3
@@ -248,8 +250,8 @@
       with_items:
         - "{{ ansible_roles.level99 }}"
       until: travis.json.0.state == "finished"
-      retries: 240
-      delay: 30
+      retries: "{{ retries }}"
+      delay: "{{ delay }}"
       failed_when: travis.json.0.result != 0
       tags:
         - level99
